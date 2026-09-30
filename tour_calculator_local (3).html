@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>محاسبه‌گر قیمت تور</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --border:#dfe3e8; --head:#dbe6f6;
+    --accent:#2f6fed; --accent-d:#1f4fb8; --danger:#e0483a; --gray:#8a94a3;
+    --total-bg:#eef1f5; --final-bg:#e7f6ec; --final-text:#1b7a3d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:"Vazirmatn","Tahoma",sans-serif;
+    background:var(--bg); margin:0; padding:24px; color:#222;
+  }
+  .wrap{max-width:1000px;margin:0 auto;}
+  h1{font-size:20px;margin:0 0 18px;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:10px;
+    padding:18px; margin-bottom:18px; box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .settings{display:flex; flex-wrap:wrap; gap:16px;}
+  .field{display:flex; flex-direction:column; gap:6px; flex:1; min-width:180px;}
+  .field label{font-size:13px; color:#555;}
+  .field input, .field select{
+    padding:9px 10px; border:1px solid var(--border); border-radius:8px; font-size:14px;
+    font-family:inherit; text-align:center; background:#fff;
+  }
+  .template-bar{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;}
+  .template-bar .field{flex:2; min-width:240px;}
+  .load-btn{
+    background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:10px 18px; font-size:14px; cursor:pointer; white-space:nowrap; height:38px;
+  }
+  .load-btn:hover{background:var(--accent-d);}
+  .hint{font-size:12px; color:var(--gray); margin-top:8px;}
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  thead th{
+    background:var(--head); padding:10px 8px; border:1px solid var(--border); font-weight:600;
+  }
+  tbody td{padding:6px; border:1px solid var(--border); text-align:center; vertical-align:middle;}
+  tbody td.desc-cell input{width:100%;}
+  tbody input{
+    width:100%; padding:7px 6px; border:1px solid var(--border); border-radius:6px;
+    font-family:inherit; font-size:14px; text-align:center;
+  }
+  tbody input.price{direction:ltr;}
+  .price-cell{display:flex; gap:6px; align-items:center;}
+  .price-cell input.price{flex:1;}
+  .mode-toggle{
+    flex:0 0 auto; border:1px solid var(--border); background:#f1f4f8; color:#3a4a63;
+    border-radius:6px; padding:7px 8px; font-size:12px; cursor:pointer; white-space:nowrap;
+    font-family:inherit;
+  }
+  .mode-toggle[data-mode="tot"]{background:#fff2e0; border-color:#e8c58a; color:#8a5a12;}
+  td.rowtotal{background:#fafbfc; font-weight:600; white-space:nowrap;}
+  td.rowtotal small{display:block; font-weight:400; color:var(--gray); font-size:11px;}
+  .rm-btn{
+    background:none; border:none; color:var(--danger); font-size:18px; cursor:pointer; line-height:1;
+  }
+  .add-row{
+    margin-top:10px; background:var(--accent); color:#fff; border:none; border-radius:8px;
+    padding:9px 16px; font-size:14px; cursor:pointer;
+  }
+  .add-row:hover{background:var(--accent-d);}
+  .summary{display:grid; grid-template-columns:1fr 1fr; gap:10px 24px;}
+  .summary .row{
+    display:flex; justify-content:space-between; padding:10px 12px; border-radius:8px;
+    background:var(--total-bg); font-size:14px;
+  }
+  .summary .row b{font-weight:700; direction:ltr;}
+  .summary .final{
+    grid-column:1 / -1; background:var(--final-bg); color:var(--final-text);
+    font-size:17px; font-weight:700; padding:14px;
+  }
+  @media(max-width:640px){ .summary{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>محاسبه‌گر قیمت تور</h1>
+
+  <div class="card template-bar">
+    <div class="field">
+      <label>قالب تور</label>
+      <select id="templateSelect">
+        <option value="">— انتخاب قالب —</option>
+      </select>
+    </div>
+    <button class="load-btn" id="loadTemplateBtn" type="button">فراخوانی قالب</button>
+  </div>
+  <div class="hint" style="margin:-10px 0 18px 4px;">
+    با فراخوانی قالب، ردیف‌های توضیحات همون تور پر میشه و قیمت‌ها خالی می‌مونن تا خودت وارد کنی. ردیف‌ها بعد از فراخوانی هم قابل ویرایش/افزودن/حذف هستن.
+    کنار هر قیمت یک دکمه هست: «× نفر» یعنی قیمتی که واردمی‌کنی سرانه‌ست و در تعداد نفرات ضرب می‌شه (مثل پرواز و هتل)، و «÷ نفر» یعنی قیمتی که واردمی‌کنی هزینه کل گروهه و بین نفرات تقسیم می‌شه (مثل نماینده آژانس، تورلیدر، گشت، ماشین فرودگاه). با کلیک روی دکمه بین این دو حالت جابه‌جا می‌شی.
+  </div>
+
+  <div class="card settings">
+    <div class="field">
+      <label>عنوان تور</label>
+      <input id="tripTitle" type="text" placeholder="مثلاً: قم و مشهد رشت هوایی">
+    </div>
+    <div class="field">
+      <label>تعداد نفرات</label>
+      <input id="passengers" type="number" value="12" min="1">
+    </div>
+    <div class="field">
+      <label>نرخ ارز (تومان به ازای هر دلار)</label>
+      <input id="exchangeRate" type="number" value="60000" min="1">
+    </div>
+    <div class="field">
+      <label>سود هر نفر (دلار)</label>
+      <input id="profitPerPerson" type="number" value="50" min="0">
+    </div>
+    <div class="field">
+      <label>نرخ دینار عراق (IQD به ازای هر ۱ دلار)</label>
+      <input id="iqdRate" type="number" value="1310" min="1">
+    </div>
+  </div>
+
+  <div class="card settings">
+    <div class="field">
+      <label>هزینه ثابت نماینده آژانس (تومان – کل تور، نه سرانه)</label>
+      <input id="repFee" type="text" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="field">
+      <label>هزینه ثابت تورلیدر ایرانی (تومان – کل تور، نه سرانه)</label>
+      <input id="leaderFee" type="text" inputmode="numeric" placeholder="0">
+    </div>
+  </div>
+  <div class="hint" style="margin:-10px 0 18px 4px;">
+    این دو مورد ثابت هستن و با عوض‌کردن قالب تور خالی نمی‌شن — فقط یک‌بار وارد کن، خودش هر بار بین تعداد نفرات همون تور تقسیم می‌شه و توی جمع کل لحاظ می‌شه.
+  </div>
+
+  <div class="card">
+    <table id="itemsTable">
+      <thead>
+        <tr>
+          <th style="width:40%">توضیحات (پرواز، هتل، گشت، ماشین، نماینده آژانس و ...)</th>
+          <th style="width:28%">قیمت (تومان) — با دکمه کنارش نوع محاسبه رو مشخص کن</th>
+          <th style="width:22%">جمع این ردیف برای کل گروه</th>
+          <th style="width:6%"></th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+        <!-- ردیف‌ها با جاوااسکریپت اضافه میشن -->
+      </tbody>
+    </table>
+    <button class="add-row" id="addRowBtn" type="button">+ افزودن ردیف</button>
+  </div>
+
+  <div class="card summary">
+    <div class="row"><span>جمع کل (تومان)</span><b id="sumTotalToman">۰</b></div>
+    <div class="row"><span>جمع کل هر نفر (تومان)</span><b id="sumPerPersonToman">۰</b></div>
+    <div class="row"><span>جمع کل هر نفر (دلار)</span><b id="sumPerPersonUsd">۰</b></div>
+    <div class="row"><span>جمع کل تور (دلار)</span><b id="sumTotalUsd">۰</b></div>
+    <div class="final">فروش نهایی به هر مشتری: <span id="finalPricePerPerson">۰</span> دلار
+      <div style="font-size:14px; font-weight:400; margin-top:4px;">معادل تقریبی: <span id="finalPricePerPersonIqd">۰</span> دینار عراق</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const itemsBody     = document.getElementById('itemsBody');
+  const addRowBtn     = document.getElementById('addRowBtn');
+  const passengersEl  = document.getElementById('passengers');
+  const rateEl        = document.getElementById('exchangeRate');
+  const iqdRateEl     = document.getElementById('iqdRate');
+  const profitEl      = document.getElementById('profitPerPerson');
+  const repFeeEl      = document.getElementById('repFee');
+  const leaderFeeEl   = document.getElementById('leaderFee');
+  const templateSelect= document.getElementById('templateSelect');
+  const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+
+  const fmt  = n => Number(n || 0).toLocaleString('en-US', {maximumFractionDigits:0});
+  const fmt2 = n => Number(n || 0).toLocaleString('en-US', {maximumFractionDigits:2});
+
+  // ---- قالب‌های آماده تور — [توضیحات، نوع محاسبه] ----
+  // نوع 'pp'  = قیمت سرانه (در تعداد نفرات ضرب می‌شه)   → مثل پرواز، هتل
+  // نوع 'tot' = هزینه کل گروه (بر تعداد نفرات تقسیم می‌شه) → مثل نماینده آژانس، تورلیدر، گشت، ماشین فرودگاه
+  const templates = {
+    'قم و مشهد هوایی': [
+      ['پرواز بغداد به مشهد', 'pp'], ['گشت مشهد', 'tot'], ['هتل مشهد', 'pp'],
+      ['پرواز مشهد به قم', 'pp'], ['هتل قم', 'pp'], ['گشت قم', 'tot'],
+      ['ماشین قم به فرودگاه امام', 'tot'], ['پرواز تهران به بغداد', 'pp']
+    ],
+    'قم و مشهد اتوبوسی': [
+      ['اتوبوس مرز به مشهد', 'pp'], ['گشت مشهد', 'tot'], ['هتل مشهد', 'pp'],
+      ['اتوبوس مشهد به قم', 'pp'], ['هتل قم', 'pp'], ['گشت قم', 'tot'],
+      ['اتوبوس قم به مرز', 'pp']
+    ],
+    'مشهد و قم و شمال هوایی': [
+      ['پرواز بغداد به مشهد', 'pp'], ['گشت مشهد', 'tot'], ['هتل مشهد', 'pp'],
+      ['پرواز مشهد به رامسر', 'pp'], ['هتل رامسر', 'pp'], ['گشت شمال', 'tot'],
+      ['رامسر به قم', 'pp'], ['هتل قم', 'pp'], ['گشت قم', 'tot'],
+      ['ماشین قم به فرودگاه امام', 'tot'], ['پرواز تهران به بغداد', 'pp']
+    ],
+    'مشهد و قم و شمال اتوبوسی': [
+      ['اتوبوس مرز به مشهد', 'pp'], ['گشت مشهد', 'tot'], ['هتل مشهد', 'pp'],
+      ['اتوبوس مشهد به رامسر', 'pp'], ['هتل رامسر', 'pp'], ['گشت شمال', 'tot'],
+      ['اتوبوس رامسر به قم', 'pp'], ['هتل قم', 'pp'], ['گشت قم', 'tot'],
+      ['اتوبوس قم به مرز', 'pp']
+    ],
+    'مشهد و شمال هوایی': [
+      ['پرواز بغداد به مشهد', 'pp'], ['گشت مشهد', 'tot'], ['هتل مشهد', 'pp'],
+      ['پرواز مشهد به رامسر', 'pp'], ['هتل رامسر', 'pp'], ['گشت شمال', 'tot'],
+      ['پرواز رامسر به بغداد', 'pp']
+    ]
+  };
+
+  Object.keys(templates).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    templateSelect.appendChild(opt);
+  });
+
+  // ---- فرمت‌دهی هزارگان برای قیمت‌ها هنگام تایپ ----
+  function rawNumber(str){
+    return Number(String(str || '').replace(/[^\d]/g, '')) || 0;
+  }
+  function formatPriceInput(input){
+    const num = rawNumber(input.value);
+    input.value = num ? fmt(num) : '';
+  }
+
+  function addRow(desc, price, mode){
+    mode = (mode === 'tot') ? 'tot' : 'pp';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="desc-cell"><input type="text" class="desc" value="${desc || ''}" placeholder="توضیحات ردیف"></td>
+      <td>
+        <div class="price-cell">
+          <button type="button" class="mode-toggle" data-mode="${mode}">${mode === 'tot' ? '÷ نفر' : '× نفر'}</button>
+          <input type="text" inputmode="numeric" class="price" value="${price ? fmt(price) : ''}" placeholder="0">
+        </div>
+      </td>
+      <td class="rowtotal">۰</td>
+      <td><button type="button" class="rm-btn" title="حذف ردیف">✕</button></td>
+    `;
+    const priceInput = tr.querySelector('.price');
+    const modeBtn = tr.querySelector('.mode-toggle');
+    priceInput.addEventListener('input', () => { formatPriceInput(priceInput); calculate(); });
+    tr.querySelector('.desc').addEventListener('input', calculate);
+    tr.querySelector('.rm-btn').addEventListener('click', () => { tr.remove(); calculate(); });
+    modeBtn.addEventListener('click', () => {
+      const next = modeBtn.dataset.mode === 'tot' ? 'pp' : 'tot';
+      modeBtn.dataset.mode = next;
+      modeBtn.textContent = next === 'tot' ? '÷ نفر' : '× نفر';
+      calculate();
+    });
+    itemsBody.appendChild(tr);
+  }
+
+  function clearRows(){
+    itemsBody.innerHTML = '';
+  }
+
+  function loadTemplate(){
+    const name = templateSelect.value;
+    if (!name || !templates[name]) return;
+    clearRows();
+    templates[name].forEach(([desc, mode]) => addRow(desc, 0, mode));
+    document.getElementById('tripTitle').value = 'تور ' + name;
+    calculate();
+  }
+
+  function calculate(){
+    const passengers = Math.max(1, Number(passengersEl.value) || 1);
+    const rate = Math.max(1, Number(rateEl.value) || 1);
+    const profit = Number(profitEl.value) || 0;
+
+    let totalToman = 0;
+    itemsBody.querySelectorAll('tr').forEach(tr => {
+      const price = rawNumber(tr.querySelector('.price').value);
+      const mode = tr.querySelector('.mode-toggle').dataset.mode;
+      // pp  = سرانه: قیمت × تعداد نفرات = هزینه کل این ردیف برای گروه
+      // tot = هزینه کل گروه: قیمت همون‌طور که وارد شده، هزینه کل این ردیفه (تقسیم می‌شه رو نفرات موقع محاسبه سرانه کل)
+      const rowTotal = (mode === 'tot') ? price : price * passengers;
+      const rowTotalCell = tr.querySelector('.rowtotal');
+      rowTotalCell.innerHTML = mode === 'tot'
+        ? `${fmt(rowTotal)}<small>هر نفر: ${fmt(rowTotal / passengers)}</small>`
+        : `${fmt(rowTotal)}<small>هر نفر: ${fmt(price)}</small>`;
+      totalToman += rowTotal;
+    });
+
+    // نماینده آژانس و تورلیدر ایرانی: هزینه ثابت کل تور، بین نفرات تقسیم می‌شه
+    const repFee = rawNumber(repFeeEl.value);
+    const leaderFee = rawNumber(leaderFeeEl.value);
+    totalToman += repFee + leaderFee;
+
+    const perPersonToman = totalToman / passengers;
+    const perPersonUsd = perPersonToman / rate;
+    const totalUsd = perPersonUsd * passengers;
+    const finalPerPerson = perPersonUsd + profit;
+    const iqdRate = Math.max(1, Number(iqdRateEl.value) || 1);
+    const finalPerPersonIqd = finalPerPerson * iqdRate;
+
+    document.getElementById('sumTotalToman').textContent = fmt(totalToman);
+    document.getElementById('sumPerPersonToman').textContent = fmt(perPersonToman);
+    document.getElementById('sumPerPersonUsd').textContent = fmt2(perPersonUsd);
+    document.getElementById('sumTotalUsd').textContent = fmt2(totalUsd);
+    document.getElementById('finalPricePerPerson').textContent = fmt2(finalPerPerson);
+    document.getElementById('finalPricePerPersonIqd').textContent = fmt(finalPerPersonIqd);
+  }
+
+  addRowBtn.addEventListener('click', () => { addRow('', 0); calculate(); });
+  loadTemplateBtn.addEventListener('click', loadTemplate);
+  [passengersEl, rateEl, iqdRateEl, profitEl].forEach(el => el.addEventListener('input', calculate));
+  [repFeeEl, leaderFeeEl].forEach(el => {
+    el.addEventListener('input', () => { formatPriceInput(el); calculate(); });
+  });
+
+  // بارگذاری اولیه: قالب اول
+  templateSelect.value = 'قم و مشهد هوایی';
+  loadTemplate();
+})();
+</script>
+</body>
+</html>
