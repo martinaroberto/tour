@@ -124,7 +124,7 @@ export default function App() {
 
   // ---- جدول مقایسه گروه‌ها: همون سناریو با نفرات مختلف ----
   const comparison = useMemo(() => {
-    const paxList = [10, 15, 20, 25, 30]
+    const paxList = [10, 15, 20, 25, 30, 40, 50]
     return paxList.map((pax) => ({
       pax,
       res: computeTrip({ ...calcInput, passengers: pax }),
