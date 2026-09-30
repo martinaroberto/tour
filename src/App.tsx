@@ -4,8 +4,8 @@ import {
   computeTrip,
   CUSTOM_TPL_KEY,
   formatNum,
+  inputNumber,
   loadJSON,
-  normalizeDigits,
   rawNumber,
   saveJSON,
   STATE_KEY,
@@ -86,10 +86,11 @@ export default function App() {
     saveJSON(STATE_KEY, state)
   }, [tripTitle, passengers, exchangeRate, profitPerPerson, profitMode, roundUsd, roundIqd, repFee, leaderFee, iqdRateStr, items, persian])
 
-  const numPassengers = Math.max(1, Math.floor(Number(normalizeDigits(passengers)) || 1))
-  const numRate = Math.max(1, Number(normalizeDigits(exchangeRate)) || 1)
-  const numProfit = Number(normalizeDigits(profitPerPerson)) || 0
-  const iqdRate = Math.max(1, Number(normalizeDigits(iqdRateStr)) || 1)
+  // نکته مهم: این فیلدها با کاما فرمت می‌شن (مثل "60,000") — باید با inputNumber پارس بشن، نه Number()
+  const numPassengers = Math.max(1, Math.floor(inputNumber(passengers) || 1))
+  const numRate = Math.max(1, inputNumber(exchangeRate) || 1)
+  const numProfit = inputNumber(profitPerPerson)
+  const iqdRate = Math.max(1, inputNumber(iqdRateStr) || 1)
 
   const fmt = useCallback((n: number, frac = 0) => formatNum(n, persian, frac), [persian])
 
@@ -106,8 +107,8 @@ export default function App() {
   const calcInput = useMemo(
     () => ({
       rows: rows.map((r) => ({ price: r.price, mode: r.item.mode })),
-      repFee: rawNumber(repFee),
-      leaderFee: rawNumber(leaderFee),
+      repFee: inputNumber(repFee),
+      leaderFee: inputNumber(leaderFee),
       passengers: numPassengers,
       exchangeRate: numRate,
       iqdRate,
@@ -210,8 +211,8 @@ export default function App() {
       date: faDate(),
       passengers: numPassengers,
       rows: rows.map((r) => ({ desc: r.item.desc, price: r.price, mode: r.item.mode, rowTotal: r.rowTotal })),
-      repFee: rawNumber(repFee),
-      leaderFee: rawNumber(leaderFee),
+      repFee: inputNumber(repFee),
+      leaderFee: inputNumber(leaderFee),
       totalToman: totals.totalToman,
       perPersonToman: totals.perPersonToman,
       perPersonUsd: totals.perPersonUsd,
@@ -500,6 +501,12 @@ export default function App() {
         <div className="row">
           <span>جمع کل هر نفر (تومان)</span>
           <b>{fmt(totals.perPersonToman)}</b>
+        </div>
+        <div className="row">
+          <span>
+            سهم هر نفر از هزینه‌های ثابت (نماینده + تورلیدر)
+          </span>
+          <b>{fmt(totals.fixedFeesPerPerson)} تومان</b>
         </div>
         <div className="row">
           <span>سود کل گروه</span>

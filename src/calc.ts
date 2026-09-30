@@ -108,6 +108,14 @@ export function rawNumber(s: string): number {
   return Number.isFinite(n) ? n : 0
 }
 
+// تبدیل رشته ورودی (که با کاما فرمت شده) به عدد — برای نرخ ارز، نفرات و ...
+// بدون این، «60,000» به NaN تبدیل می‌شه و نرخ به ۱ سقوط می‌کنه → همه اعداد دلاری اشتباه می‌شن
+export function inputNumber(s: string): number {
+  const cleaned = normalizeDigits(String(s ?? '')).replace(/[^\d]/g, '')
+  const n = Number(cleaned)
+  return Number.isFinite(n) ? n : 0
+}
+
 export function formatNum(n: number, persian: boolean, maxFrac = 0): string {
   const s = n.toLocaleString('en-US', { maximumFractionDigits: maxFrac })
   return persian ? toPersianDigits(s) : s
@@ -145,6 +153,7 @@ export interface CalcResult {
   totalUsd: number
   finalPerPerson: number
   finalPerPersonIqd: number
+  fixedFeesPerPerson: number
 }
 
 export function computeTrip(i: CalcInput): CalcResult {
@@ -159,7 +168,9 @@ export function computeTrip(i: CalcInput): CalcResult {
   const totalUsd = perPersonUsd * pax
   const finalPerPerson = roundUpTo(perPersonUsd + profitUsd, i.roundUsd)
   const finalPerPersonIqd = roundUpTo(finalPerPerson * i.iqdRate, i.roundIqd)
-  return { totalToman, perPersonToman, perPersonUsd, profitUsd, totalUsd, finalPerPerson, finalPerPersonIqd }
+  // سهم هر نفر از هزینه‌های ثابت (نماینده/تورلیدر) — برای نمایش شفاف
+  const fixedFeesPerPerson = (i.repFee + i.leaderFee) / pax
+  return { totalToman, perPersonToman, perPersonUsd, profitUsd, totalUsd, finalPerPerson, finalPerPersonIqd, fixedFeesPerPerson }
 }
 
 // ---- localStorage امن ----
