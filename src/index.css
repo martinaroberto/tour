@@ -162,3 +162,118 @@ td.rowtotal small{display:block; font-weight:400; color:var(--gray); font-size:1
   .invoice{padding:18px;}
   .invoice-head{flex-direction:column;}
 }
+
+/* ---- تب‌ها (پوسته اصلی) ---- */
+.tabs{display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid var(--border); padding-bottom:0;}
+.tab{
+  background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px;
+  padding:10px 18px; font-size:15px; font-weight:600; color:#5a6b80; cursor:pointer; font-family:inherit;
+}
+.tab:hover{color:var(--accent);}
+.tab.active{color:var(--accent); border-bottom-color:var(--accent);}
+
+/* ---- بنر ویرایش ---- */
+.edit-banner{
+  background:#fff8e6; border:1px solid #ecd9a0; color:#8a5a12; border-radius:10px;
+  padding:12px 16px; margin-bottom:16px; font-size:14px; display:flex; gap:10px; align-items:center;
+}
+.link-btn{background:none; border:none; color:var(--accent); cursor:pointer; font-size:13px; text-decoration:underline; font-family:inherit; padding:0 4px;}
+
+/* ---- نوار ذخیره تور ---- */
+.save-trip-bar{display:flex; gap:14px; align-items:flex-end; flex-wrap:wrap;}
+.save-trip-bar .field{flex:1; min-width:200px;}
+.save-trip-bar .load-btn.big{flex:0 0 auto;}
+.save-msg{color:var(--final-text); font-weight:600; font-size:14px;}
+.ghost-btn{background:#eef1f5; color:#3a4a63;}
+.ghost-btn:hover{background:#e0e6ef;}
+
+/* ---- کارت‌های آماری ---- */
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px;}
+.stat-card{
+  background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  border-top:3px solid var(--accent);
+}
+.stat-card.yellow{border-top-color:#d9a520;}
+.stat-card.blue{border-top-color:#2f6fed;}
+.stat-card.green{border-top-color:#1b7a3d;}
+.stat-card.usd{border-top-color:#7a3df0;}
+.stat-num{font-size:22px; font-weight:800; direction:ltr; text-align:right;}
+.stat-label{font-size:12px; color:var(--gray); margin-top:4px;}
+
+/* ---- نوار فیلتر ---- */
+.filter-bar{display:flex; gap:14px; flex-wrap:wrap;}
+.filter-bar .field{flex:1; min-width:180px;}
+
+/* ---- حالت خالی ---- */
+.empty-state{color:var(--gray); text-align:center; padding:36px 18px; font-size:14px;}
+.empty-inline{color:var(--gray); font-size:13px; padding:10px 4px;}
+
+/* ---- ردیف تور در لیست ---- */
+.trip-row{display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap;}
+.trip-main{flex:2; min-width:240px;}
+.trip-title-line{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.trip-title{font-size:16px; font-weight:700;}
+.trip-meta{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--gray); margin-top:6px;}
+.trip-numbers{display:flex; gap:16px; flex:2; min-width:260px; flex-wrap:wrap;}
+.trip-numbers > div{display:flex; flex-direction:column; gap:2px;}
+.trip-numbers small{color:var(--gray); font-size:11px;}
+.trip-numbers b{font-size:15px; direction:ltr;}
+.trip-actions{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+.trip-actions .status-select{
+  padding:8px 10px; border:1px solid var(--border); border-radius:8px; font-family:inherit; font-size:13px; background:#fff; cursor:pointer;
+}
+.sm-btn{
+  background:#eef2f8; border:1px solid var(--border); color:#3a4a63; border-radius:8px;
+  padding:8px 12px; font-size:13px; cursor:pointer; font-family:inherit; white-space:nowrap;
+}
+.sm-btn:hover{background:#e0e8f4;}
+.sm-btn.danger{background:#fdeeee; border-color:#f2caca; color:#a33;}
+.sm-btn.danger:hover{background:#fbdcdc;}
+.sm-btn.ghost{background:#f5f6f8;}
+
+/* ---- نشان وضعیت ---- */
+.status-badge{
+  display:inline-block; font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap;
+}
+.st-quote{background:#fff4dd; color:#8a5a12;}
+.st-confirmed{background:#e3edfd; color:#1f4fb8;}
+.st-completed{background:#e2f5e9; color:#1b7a3d;}
+
+/* ---- کارت مشتری ---- */
+.customer-card{padding:14px 18px;}
+.customer-head{display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;}
+.expand-btn{
+  background:#eef2f8; border:1px solid var(--border); border-radius:6px; width:30px; height:30px;
+  cursor:pointer; font-size:13px; color:#3a4a63; flex:0 0 auto;
+}
+.customer-info{flex:2; min-width:200px;}
+.customer-name{font-size:16px; font-weight:700;}
+.customer-note{font-size:12px; color:var(--gray); margin-top:2px;}
+.customer-since{font-size:11px; color:var(--gray); margin-top:4px;}
+.customer-stats{display:flex; gap:8px; flex-wrap:wrap;}
+.mini-stat{
+  background:var(--total-bg); border-radius:8px; padding:6px 12px; text-align:center; min-width:56px;
+  display:flex; flex-direction:column; gap:1px;
+}
+.mini-stat b{font-size:15px; direction:ltr;}
+.mini-stat span{font-size:10px; color:var(--gray);}
+.mini-stat.yellow{background:#fff4dd;}
+.mini-stat.blue{background:#e3edfd;}
+.mini-stat.green{background:#e2f5e9;}
+.mini-stat.usd{background:#efe6fd;}
+.customer-actions{display:flex; gap:8px; flex-wrap:wrap;}
+.customer-edit{display:flex; gap:12px; margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); flex-wrap:wrap;}
+.customer-trips{margin-top:12px; padding-top:12px; border-top:1px dashed var(--border); overflow-x:auto;}
+.ct-table{min-width:520px; font-size:13px;}
+.ct-table th{background:var(--head); padding:7px; border:1px solid var(--border);}
+.ct-table td{padding:6px 7px; border:1px solid var(--border); text-align:center;}
+.ct-table .rt{text-align:right;}
+
+/* ---- فرم افزودن مشتری ---- */
+.add-customer{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;}
+.add-customer .field{flex:1; min-width:200px;}
+
+@media(max-width:720px){
+  .trip-row{flex-direction:column;}
+  .trip-numbers{width:100%;}
+}
