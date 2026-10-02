@@ -59,7 +59,155 @@ export interface Trip {
 
 export const CUSTOMERS_KEY = 'tc_customers_v1'
 export const TRIPS_KEY = 'tc_trips_v1'
+export const HOTELS_KEY = 'tc_hotels_v1'
+export const RESERVATIONS_KEY = 'tc_reservations_v1'
+export const VOUCHERS_KEY = 'tc_vouchers_v1'
+export const AGENCY_KEY = 'tc_agency_v1'
 export { CUSTOM_TPL_KEY, STATE_KEY }
+
+// ---------- هتل‌ها و اسناد ----------
+
+export interface Hotel {
+  id: string
+  name: string
+  city: string
+  phone: string
+  email: string
+  createdAt: number
+}
+
+/** درخواست رزرو — نامه سربرگ برای هتل */
+export interface RoomLine {
+  id: string
+  roomType: string
+  count: number
+  services: string
+}
+
+export interface GuestLine {
+  id: string
+  name: string
+  passport: string
+  nationality: string
+  roomId: string
+}
+
+export type DocStatus = 'draft' | 'sent' | 'approved' | 'rejected'
+
+export const DOC_STATUS_LABEL: Record<DocStatus, string> = {
+  draft: 'پیش‌نویس',
+  sent: 'ارسال شده',
+  approved: 'تایید هتل',
+  rejected: 'رد شده',
+}
+
+export interface ReservationRequest {
+  id: string
+  hotelId: string
+  title: string
+  checkIn: string // YYYY-MM-DD
+  checkOut: string // YYYY-MM-DD
+  nights: number
+  rooms: RoomLine[]
+  guests: GuestLine[]
+  notes: string
+  contact: string // رابط/تورلیدر و تلفن
+  status: DocStatus
+  createdAt: number
+  updatedAt: number
+}
+
+/** واچر — سند دست مسافر */
+export interface Voucher {
+  id: string
+  hotelId: string
+  code: string
+  guestName: string
+  adults: number
+  children: number
+  checkIn: string
+  checkOut: string
+  nights: number
+  roomType: string
+  services: string
+  notes: string
+  status: DocStatus
+  createdAt: number
+  updatedAt: number
+}
+
+/** مشخصات آژانس برای سربرگ نامه و واچر */
+export interface AgencyProfile {
+  name: string
+  address: string
+  phone: string
+  email: string
+  logoText: string
+}
+
+export const DEFAULT_AGENCY: AgencyProfile = {
+  name: 'آژانس مسافرتی من',
+  address: '',
+  phone: '',
+  email: '',
+  logoText: '✈',
+}
+
+export function loadHotels(): Hotel[] {
+  return loadJSON<Hotel[]>(HOTELS_KEY, [])
+}
+
+export function saveHotels(list: Hotel[]): void {
+  saveJSON(HOTELS_KEY, list)
+}
+
+export function loadReservations(): ReservationRequest[] {
+  return loadJSON<ReservationRequest[]>(RESERVATIONS_KEY, [])
+}
+
+export function saveReservations(list: ReservationRequest[]): void {
+  saveJSON(RESERVATIONS_KEY, list)
+}
+
+export function loadVouchers(): Voucher[] {
+  return loadJSON<Voucher[]>(VOUCHERS_KEY, [])
+}
+
+export function saveVouchers(list: Voucher[]): void {
+  saveJSON(VOUCHERS_KEY, list)
+}
+
+export function loadAgency(): AgencyProfile {
+  return { ...DEFAULT_AGENCY, ...loadJSON<Partial<AgencyProfile>>(AGENCY_KEY, {}) }
+}
+
+export function saveAgency(p: AgencyProfile): void {
+  saveJSON(AGENCY_KEY, p)
+}
+
+/** تعداد شب بین دو تاریخ */
+export function nightsBetween(checkIn: string, checkOut: string): number {
+  if (!checkIn || !checkOut) return 0
+  const a = new Date(checkIn + 'T00:00:00')
+  const b = new Date(checkOut + 'T00:00:00')
+  const n = Math.round((b.getTime() - a.getTime()) / 86400000)
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
+/** تاریخ شمسی از رشته ISO (YYYY-MM-DD) */
+export function faIso(iso: string): string {
+  if (!iso) return '—'
+  try {
+    return new Intl.DateTimeFormat('fa-IR', { dateStyle: 'medium' }).format(new Date(iso + 'T00:00:00'))
+  } catch {
+    return iso
+  }
+}
+
+/** کد یکتای واچر مثل VC-7F3A2B */
+export function voucherCode(): string {
+  return 'VC-' + Math.random().toString(36).slice(2, 8).toUpperCase()
+}
 
 // ---------- ذخیره‌سازی امن localStorage ----------
 

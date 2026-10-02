@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { formatNum, type Mode } from './calc'
 
 export interface InvoiceData {
@@ -38,7 +39,7 @@ export default function Invoice({ data, open, onClose }: { data: InvoiceData; op
 
   const f = (n: number, frac = 0) => formatNum(n, data.persian, frac)
 
-  return (
+  return createPortal(
     <div className="invoice-overlay" onClick={onClose}>
       <div className="invoice" onClick={(e) => e.stopPropagation()}>
         <div className="invoice-head">
@@ -127,6 +128,7 @@ export default function Invoice({ data, open, onClose }: { data: InvoiceData; op
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import Calculator from './Calculator'
 import Customers from './Customers'
+import Hotels from './Hotels'
 import Trips from './Trips'
 import type { Trip } from './storage'
 
-type Tab = 'calc' | 'trips' | 'customers'
+type Tab = 'calc' | 'trips' | 'customers' | 'hotels'
 
 export default function App() {
   const [tab, setTab] = useState<Tab>('calc')
@@ -34,6 +35,9 @@ export default function App() {
         <button type="button" className={tab === 'customers' ? 'tab active' : 'tab'} onClick={() => setTab('customers')}>
           🏢 مشتریان
         </button>
+        <button type="button" className={tab === 'hotels' ? 'tab active' : 'tab'} onClick={() => setTab('hotels')}>
+          🏨 هتل‌ها و واچر
+        </button>
       </nav>
 
       {tab === 'calc' && (
@@ -50,6 +54,7 @@ export default function App() {
       )}
       {tab === 'trips' && <Trips onEdit={openEdit} />}
       {tab === 'customers' && <Customers onNewTrip={newTripFor} />}
+      {tab === 'hotels' && <Hotels />}
     </div>
   )
 }
